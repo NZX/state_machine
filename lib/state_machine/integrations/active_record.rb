@@ -456,11 +456,14 @@ module StateMachine
           })
         end
         
-        # Runs a new database transaction, rolling back any changes by raising
-        # an ActiveRecord::Rollback exception if the yielded block fails
-        # (i.e. returns false).
+        # Runs a new database transaction, obtaining a lock on the current object,
+        # rolling back any changes by raising an ActiveRecord::Rollback exception
+        # if the yielded block fails (i.e. returns false).
         def transaction(object)
-          object.class.transaction {raise ::ActiveRecord::Rollback unless yield}
+          object.class.transaction do
+            object.lock!
+            raise ::ActiveRecord::Rollback unless yield
+          end
         end
         
       private
