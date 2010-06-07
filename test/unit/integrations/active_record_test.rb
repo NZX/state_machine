@@ -22,8 +22,8 @@ rescue LoadError
   end
 end
 
-# Establish database connection
-if ENV['RUN_CONCURRENCY']
+RUN_CONCURRENCY = false
+if RUN_CONCURRENCY
   ActiveRecord::Base.establish_connection({
     'adapter'  => 'mysql',
     'database' => 'state_machine_test',
@@ -672,14 +672,14 @@ module ActiveRecordTest
     end
   end
 
-  if ENV['RUN_CONCURRENCY']
+  if RUN_CONCURRENCY
     class MachineWithLockingTest < BaseTestCase
       require 'fileutils'
       require 'timeout'
 
       def setup
         @model_class = new_model do
-          state_machine :initial => :parked do
+          state_machine :initial => :parked, :lock_transitions => true do
             event :ignite do
               transition :parked => :idling
             end

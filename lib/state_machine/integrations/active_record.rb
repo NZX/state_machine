@@ -461,7 +461,7 @@ module StateMachine
         # if the yielded block fails (i.e. returns false).
         def transaction(object)
           object.class.transaction do
-            object.lock!
+            object.lock! if lock_transitions?
             raise ::ActiveRecord::Rollback unless yield
           end
         end
